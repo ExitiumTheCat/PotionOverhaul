@@ -1,0 +1,3 @@
+displayName = Alchemy Overhaul
+author = ExitiumTheCat
+version = 1.0
