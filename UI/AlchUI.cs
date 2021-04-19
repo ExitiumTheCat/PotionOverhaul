@@ -16,6 +16,7 @@ namespace PotionOverhaul.UI
 		public static CustomItemSlot PotionSlot = new CustomItemSlot();
 		public UIImageButton BrewButton = new UIImageButton(ModContent.GetTexture("PotionOverhaul/UI/BrewButton"));
 		public int[] OldIngredients = new int[3];
+		public Item OldPotion = new Item();
 		CroppedTexture2D backgroundTexture = new CroppedTexture2D(ModContent.GetTexture("PotionOverhaul/UI/Slot"), Color.White);
 		CroppedTexture2D iconTextureIngredient = new CroppedTexture2D(ModContent.GetTexture("PotionOverhaul/UI/IngredientSlotIcon"), Color.White);
 		CroppedTexture2D iconTexturePotion = new CroppedTexture2D(ModContent.GetTexture("PotionOverhaul/UI/PotionSlotIcon"), Color.White);
@@ -56,14 +57,16 @@ namespace PotionOverhaul.UI
 			IngredientSlot[2].VAlign = 0.125f;
 			Background.Append(IngredientSlot[2]);
 
-			PotionSlot= new CustomItemSlot(0, 0.9f)
+			PotionSlot = new CustomItemSlot(0, 0.9f)
 			{
+				IsValidItem = item => item.IsAir,
 				BackgroundTexture = backgroundTexture,
 				EmptyTexture = iconTexturePotion,
 				HoverText = "Potion"
 			};
 			PotionSlot.HAlign = 0.50f;
 			PotionSlot.VAlign = 0.85f;
+			PotionSlot.OnClick += OnPotionSlot;
 			Background.Append(PotionSlot);
 
 			BrewButton.HAlign = 0.50f;
@@ -119,7 +122,30 @@ namespace PotionOverhaul.UI
 				{
 					IngredientSlot[i].Item.stack--;
 				}
-				OldIngredients = new int[3];
+			}
+		}
+		private void OnPotionSlot(UIMouseEvent evt, UIElement listeningElement)
+		{
+			Item item = Main.LocalPlayer.trashItem;
+			if (!item.IsAir && item.type == ModContent.ItemType<AlchPotion>() && !(item.modItem as AlchPotion).Brewed)
+			{
+				item.alpha = 0;
+				(item.modItem as AlchPotion).Brewed = true;
+				for (int i2 = 0; i2 < IngredientSlot.Length; i2++)
+				{
+					IngredientSlot[i2].Item.stack--;
+				}
+				return;
+			}
+			Item itemm = Main.mouseItem;
+			if (!itemm.IsAir && itemm.type == ModContent.ItemType<AlchPotion>() && !(itemm.modItem as AlchPotion).Brewed)
+			{
+				itemm.alpha = 0;
+				(itemm.modItem as AlchPotion).Brewed = true;
+				for (int i2 = 0; i2 < IngredientSlot.Length; i2++)
+				{
+					IngredientSlot[i2].Item.stack--;
+				}
 			}
 		}
 	}

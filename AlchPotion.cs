@@ -54,14 +54,6 @@ namespace PotionOverhaul
 				}
 			}
 		}
-		public override void UpdateInventory(Player player)
-		{
-			if (!Brewed) item.TurnToAir();
-		}
-		public override void HoldItem(Player player)
-		{
-			if (!Brewed) item.TurnToAir();
-		}
 		public override bool UseItem(Player player)
 		{
 			player.GetModPlayer<AlchPlayer>().ItemsOnPotion = ItemsOnPotion;
