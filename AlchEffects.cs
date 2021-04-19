@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -42,6 +43,14 @@ namespace PotionOverhaul
 				default:
 					return "";
 			};
+		}
+		public static string AlchGetComboTooltip(Item item, int amount, List<Item> list)
+		{
+			switch (item.type) 
+			{
+				default:
+					return "";
+			}
 		}
 		public static void AlchPostUpdateEquip(Player player, int amount, Item item)
 		{

@@ -11,6 +11,8 @@ namespace PotionOverhaul
 		public override bool CloneNewInstances => true;
 		public List<Item> ItemsOnPotion = new List<Item>();
 		public bool Brewed;
+		public int Style;
+		public Color AverageColor;
 		public override void SetStaticDefaults()
 		{
 			DisplayName.SetDefault("Strange Potion");
@@ -37,7 +39,9 @@ namespace PotionOverhaul
 					string positive = "";
 					for (int i = 0; i < ItemsOnPotion.Count; i++)
 					{
-						positive += AlchEffects.AlchGetPositiveTooltip(ItemsOnPotion[i], ItemsOnPotion[i].stack) + (i == ItemsOnPotion.Count - 1 ? "" : "\n");
+						var p = AlchEffects.AlchGetPositiveTooltip(ItemsOnPotion[i], ItemsOnPotion[i].stack);
+						if (p != "")
+							positive += p + (i == ItemsOnPotion.Count - 1 ? "" : "\n");
 					}
 					line.text = positive;
 					line.overrideColor = Color.LightGreen;
@@ -47,7 +51,9 @@ namespace PotionOverhaul
 					string negative = "";
 					for (int i = 0; i < ItemsOnPotion.Count; i++)
 					{
-						negative += AlchEffects.AlchGetNegativeTooltip(ItemsOnPotion[i], ItemsOnPotion[i].stack) + (AlchEffects.AlchGetNegativeTooltip(ItemsOnPotion[i], ItemsOnPotion[i].stack) == "" ? "" : "\n");
+						var n = AlchEffects.AlchGetNegativeTooltip(ItemsOnPotion[i], ItemsOnPotion[i].stack);
+						if (n != "")
+							negative += n + (i == ItemsOnPotion.Count - 1 ? "" : "\n");
 					}
 					line.text = negative;
 					line.overrideColor = Color.OrangeRed;

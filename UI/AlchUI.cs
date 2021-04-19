@@ -6,6 +6,8 @@ using Terraria.UI;
 using PotionOverhaul.UI.CustomSlot;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace PotionOverhaul.UI
 {
@@ -19,6 +21,7 @@ namespace PotionOverhaul.UI
 		public int[] OldIngredients = new int[3];
 		public Item OldPotion = new Item();
 		public bool Blocked;
+		public Color AverageColor = new Color();
 		CroppedTexture2D backgroundTexture = new CroppedTexture2D(ModContent.GetTexture("PotionOverhaul/UI/Slot"), Color.White);
 		CroppedTexture2D iconTextureIngredient = new CroppedTexture2D(ModContent.GetTexture("PotionOverhaul/UI/IngredientSlotIcon"), Color.White);
 		CroppedTexture2D iconTexturePotion = new CroppedTexture2D(ModContent.GetTexture("PotionOverhaul/UI/PotionSlotIcon"), Color.White);
@@ -103,6 +106,7 @@ namespace PotionOverhaul.UI
 					{
 						if (!IngredientSlot[i].Item.IsAir)
 						{
+							AverageColor = MixColor(AverageColor, ColorsToArrayToAverage(Main.itemTexture[IngredientSlot[i].Item.type]));
 							if (Potion.ItemsOnPotion.FindAll(t => t.type == IngredientSlot[i].Item.type).Count > 0)
 							{
 								Potion.ItemsOnPotion.Find(t => t.type == IngredientSlot[i].Item.type).stack++;
@@ -115,6 +119,7 @@ namespace PotionOverhaul.UI
 							}
 						}
 					}
+					Potion.AverageColor = AverageColor;
 					PotionSlot.Item.alpha = 155;
 				}
 				else
@@ -134,23 +139,6 @@ namespace PotionOverhaul.UI
 				}
 				if ((PotionSlot.Item.modItem as AlchPotion).Brewed)
 				{
-					List<Item> itemList = new List<Item>();
-					for (int i = 0; i < IngredientSlot.Length; i++)
-					{
-						if (!IngredientSlot[i].Item.IsAir)
-						{
-							if (itemList.FindAll(t => t.type == IngredientSlot[i].Item.type).Count > 0)
-							{
-								itemList.Find(t => t.type == IngredientSlot[i].Item.type).stack++;
-							}
-							else
-							{
-								Item ingredient = IngredientSlot[i].Item.Clone();
-								ingredient.stack = 1;
-								itemList.Add(ingredient);
-							}
-						}
-					}
 					if (Enumerable.SequenceEqual(OldIngredients, IngredientSlot.Select(e => e.Item.type)) && !IngredientSlot.Any(e => e.Item.stack == 0))
 					{
 						PotionSlot.Item.stack++;
@@ -194,6 +182,28 @@ namespace PotionOverhaul.UI
 					IngredientSlot[i2].Item.stack--;
 				}
 			}
+		}
+		private Color ColorsToArrayToAverage(Texture2D texture)
+		{
+			Color[] colors = new Color[texture.Width * texture.Height];
+			texture.GetData(colors);
+			Color averagecolor = new Color();
+			for (int x = 0; x < texture.Width; x++)
+			{
+				for (int y = 0; y < texture.Height; y++)
+				{
+					if (colors[x + y * texture.Width].A != 0)
+					averagecolor = MixColor(averagecolor, colors[x + y * texture.Width]);
+				}
+			}
+			return averagecolor;
+		}
+		private Color MixColor(Color color, Color color2)
+		{
+			int r = (color.R + color2.R) / 2;
+			int g = (color.G + color2.G) / 2;
+			int b = (color.B + color2.B) / 2;
+			return new Color(Convert.ToByte(r), Convert.ToByte(g), Convert.ToByte(b));
 		}
 	}
 }

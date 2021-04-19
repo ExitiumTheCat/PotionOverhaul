@@ -24,15 +24,18 @@ namespace PotionOverhaul
 		}
 		public override void ModifyBuffTip(ref string tip, ref int rare)
 		{
-			tip = "";
-			for (int i = 0; i < ItemsOnPotion.Count(); i++)
+			var positive = "";
+			var negative = "";
+			for (int i = 0; i < ItemsOnPotion.Count; i++)
 			{
-				tip += AlchEffects.AlchGetPositiveTooltip(ItemsOnPotion[i], ItemsOnPotion[i].stack) + "\n";
+				var p = AlchEffects.AlchGetPositiveTooltip(ItemsOnPotion[i], ItemsOnPotion[i].stack);
+				if (p != "")
+					positive += p + (i == ItemsOnPotion.Count - 1 ? "" : "\n");
+				var n = AlchEffects.AlchGetNegativeTooltip(ItemsOnPotion[i], ItemsOnPotion[i].stack);
+				if (n != "")
+					negative += n + (i == ItemsOnPotion.Count - 1 ? "" : "\n");
 			}
-			for (int i = 0; i < ItemsOnPotion.Count(); i++)
-			{
-				tip += AlchEffects.AlchGetNegativeTooltip(ItemsOnPotion[i], ItemsOnPotion[i].stack) + "\n";
-			}
+			tip = positive + "\n" + negative;
 		}
 	}
 }
