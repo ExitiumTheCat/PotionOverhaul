@@ -11,19 +11,6 @@ using Terraria.UI.Chat;
 
 namespace PotionOverhaul.UI.CustomSlot {
     public class CustomItemSlot : UIElement {
-        public enum ArmorType {
-            Head,
-            Chest,
-            Leg
-        }
-
-        public static class DefaultColors {
-            public static readonly Color EmptyTexture = Color.White * 0.35f;
-            public static readonly Color InventoryItemBack = Main.inventoryBack;
-            public static readonly Color EquipBack = Color.White * 0.8f;
-
-        }
-
         internal const int TickOffsetX = 6;
         internal const int TickOffsetY = 2;
 
@@ -75,12 +62,11 @@ namespace PotionOverhaul.UI.CustomSlot {
             }
         }
 
-        public CustomItemSlot(int context = ItemSlot.Context.InventoryItem, float scale = 1f,
-            ArmorType defaultArmorIcon = ArmorType.Head) {
+        public CustomItemSlot(int context = ItemSlot.Context.InventoryItem, float scale = 1f) {
             Context = context;
             _scale = scale;
             _backgroundTexture = GetBackgroundTexture(context);
-            EmptyTexture = GetEmptyTexture(context, defaultArmorIcon);
+            EmptyTexture = GetEmptyTexture(context);
             ItemVisible = true;
             ForceToggleButton = false;
 
@@ -289,38 +275,30 @@ namespace PotionOverhaul.UI.CustomSlot {
                 case ItemSlot.Context.EquipMinecart:
                 case ItemSlot.Context.EquipPet:
                 case ItemSlot.Context.EquipLight:
-                    color = DefaultColors.EquipBack;
                     texture = Main.inventoryBack3Texture;
                     break;
                 case ItemSlot.Context.EquipArmorVanity:
                 case ItemSlot.Context.EquipAccessoryVanity:
-                    color = DefaultColors.EquipBack;
                     texture = Main.inventoryBack8Texture;
                     break;
                 case ItemSlot.Context.EquipDye:
-                    color = DefaultColors.EquipBack;
                     texture = Main.inventoryBack12Texture;
                     break;
                 case ItemSlot.Context.ChestItem:
-                    color = DefaultColors.InventoryItemBack;
                     texture = Main.inventoryBack5Texture;
                     break;
                 case ItemSlot.Context.BankItem:
-                    color = DefaultColors.InventoryItemBack;
                     texture = Main.inventoryBack2Texture;
                     break;
                 case ItemSlot.Context.GuideItem:
                 case ItemSlot.Context.PrefixItem:
                 case ItemSlot.Context.CraftingMaterial:
-                    color = DefaultColors.InventoryItemBack;
                     texture = Main.inventoryBack4Texture;
                     break;
                 case ItemSlot.Context.TrashItem:
-                    color = DefaultColors.InventoryItemBack;
                     texture = Main.inventoryBack7Texture;
                     break;
                 case ItemSlot.Context.ShopItem:
-                    color = DefaultColors.InventoryItemBack;
                     texture = Main.inventoryBack6Texture;
                     break;
                 default:
@@ -337,35 +315,13 @@ namespace PotionOverhaul.UI.CustomSlot {
         /// <param name="context">slot context</param>
         /// <param name="armorType">type of equipment in the slot</param>
         /// <returns>empty texture of the slot</returns>
-        public static CroppedTexture2D GetEmptyTexture(int context, ArmorType armorType = ArmorType.Head) {
+        public static CroppedTexture2D GetEmptyTexture(int context) {
             int frame = -1;
 
             switch(context) {
                 case ItemSlot.Context.EquipArmor:
-                    switch(armorType) {
-                        case ArmorType.Head:
-                            frame = 0;
-                            break;
-                        case ArmorType.Chest:
-                            frame = 6;
-                            break;
-                        case ArmorType.Leg:
-                            frame = 12;
-                            break;
-                    }
                     break;
                 case ItemSlot.Context.EquipArmorVanity:
-                    switch(armorType) {
-                        case ArmorType.Head:
-                            frame = 3;
-                            break;
-                        case ArmorType.Chest:
-                            frame = 9;
-                            break;
-                        case ArmorType.Leg:
-                            frame = 15;
-                            break;
-                    }
                     break;
                 case ItemSlot.Context.EquipAccessory:
                     frame = 11;
@@ -400,7 +356,7 @@ namespace PotionOverhaul.UI.CustomSlot {
             rectangle.Width -= 2;
             rectangle.Height -= 2;
 
-            return new CroppedTexture2D(extraTextures, DefaultColors.EmptyTexture, rectangle);
+            return new CroppedTexture2D(extraTextures, Color.White, rectangle);
         }
     }
 }

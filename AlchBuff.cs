@@ -9,7 +9,6 @@ namespace PotionOverhaul
 	public class AlchBuff : ModBuff
 	{
 		public List<Item> ItemsOnPotion = new List<Item>();
-		AlchGlobalItem alchGlobalItem = new AlchGlobalItem();
 		public override void SetDefaults()
 		{
 			DisplayName.SetDefault("Potion Effects!");
@@ -28,11 +27,11 @@ namespace PotionOverhaul
 			tip = "";
 			for (int i = 0; i < ItemsOnPotion.Count(); i++)
 			{
-				tip += alchGlobalItem.AlchGetPositiveTooltip(ItemsOnPotion[i], ItemsOnPotion[i].stack) + "\n";
+				tip += AlchEffects.AlchGetPositiveTooltip(ItemsOnPotion[i], ItemsOnPotion[i].stack) + "\n";
 			}
 			for (int i = 0; i < ItemsOnPotion.Count(); i++)
 			{
-				tip += alchGlobalItem.AlchGetNegativeTooltip(ItemsOnPotion[i], ItemsOnPotion[i].stack) + "\n";
+				tip += AlchEffects.AlchGetNegativeTooltip(ItemsOnPotion[i], ItemsOnPotion[i].stack) + "\n";
 			}
 		}
 	}

@@ -8,7 +8,6 @@ namespace PotionOverhaul
 	class AlchPlayer : ModPlayer
 	{
 		public List<Item> ItemsOnPotion = new List<Item>();
-		AlchGlobalItem alchGlobalItem = new AlchGlobalItem();
 		public override void PreUpdate()
 		{
 			if (ItemsOnPotion.Count > 0 && !player.HasBuff(ModContent.BuffType<AlchBuff>()))
@@ -19,7 +18,7 @@ namespace PotionOverhaul
 			if (!player.HasBuff(ModContent.BuffType<AlchBuff>())) return;
 			for (int i = 0; i < ItemsOnPotion.Count(); i++)
 			{
-				alchGlobalItem.AlchPostUpdateEquip(player, ItemsOnPotion[i].stack, ItemsOnPotion[i]);
+				AlchEffects.AlchPostUpdateEquip(player, ItemsOnPotion[i].stack, ItemsOnPotion[i]);
 			}
 		}
 		public override void OnHitNPC(Item item, NPC target, int damage, float knockback, bool crit)
@@ -27,7 +26,7 @@ namespace PotionOverhaul
 			if (!player.HasBuff(ModContent.BuffType<AlchBuff>())) return;
 			for (int i = 0; i < ItemsOnPotion.Count(); i++)
 			{
-				alchGlobalItem.AlchOnMeleeHit(player, ItemsOnPotion[i].stack, ItemsOnPotion[i], target, damage, knockback, crit);
+				AlchEffects.AlchOnMeleeHit(player, ItemsOnPotion[i].stack, ItemsOnPotion[i], target, damage, knockback, crit);
 			}
 		}
 	}

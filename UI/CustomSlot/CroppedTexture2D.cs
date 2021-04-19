@@ -18,7 +18,7 @@ namespace PotionOverhaul.UI.CustomSlot {
 
         public CroppedTexture2D(Texture2D texture, Color color, Rectangle rectangle) {
             Texture = texture;
-            Color =  Color.Orange * 0.8f;
+            Color =  color;
             Rectangle = rectangle;
         }
 
