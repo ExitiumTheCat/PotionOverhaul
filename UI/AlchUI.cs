@@ -14,14 +14,14 @@ namespace PotionOverhaul.UI
 	//Overengineering, restart
 	internal class AlchUI : UIState
 	{
-		UIImage Background = new UIImage(ModContent.GetTexture("PotionOverhaul/UI/Background"));
 		public static CustomItemSlot[] IngredientSlot = new CustomItemSlot[3];
 		public static CustomItemSlot PotionSlot = new CustomItemSlot();
-		public UIImageButton BrewButton = new UIImageButton(ModContent.GetTexture("PotionOverhaul/UI/BrewButton"));
 		public int[] OldIngredients = new int[3];
-		public Item OldPotion = new Item();
+		public UIImage Background = new UIImage(ModContent.GetTexture("PotionOverhaul/UI/Background"));
+		public UIImageButton BrewButton = new UIImageButton(ModContent.GetTexture("PotionOverhaul/UI/BrewButton"));
 		public bool Blocked;
-		public Color AverageColor = new Color();
+		Color OldAverageColor = new Color(1, 1, 1, 1);
+		Color AverageColor = new Color(1, 1, 1, 1);
 		CroppedTexture2D backgroundTexture = new CroppedTexture2D(ModContent.GetTexture("PotionOverhaul/UI/Slot"), Color.White);
 		CroppedTexture2D iconTextureIngredient = new CroppedTexture2D(ModContent.GetTexture("PotionOverhaul/UI/IngredientSlotIcon"), Color.White);
 		CroppedTexture2D iconTexturePotion = new CroppedTexture2D(ModContent.GetTexture("PotionOverhaul/UI/PotionSlotIcon"), Color.White);
@@ -78,6 +78,7 @@ namespace PotionOverhaul.UI
 			BrewButton.VAlign = 0.45f;
 			BrewButton.OnClick += OnBrewButton;
 			Background.Append(BrewButton);
+
 			OldIngredients = IngredientSlot.Select(e => e.Item.type).ToArray();
 		}
 		public override void Update(GameTime gameTime)
@@ -97,16 +98,23 @@ namespace PotionOverhaul.UI
 			}
 			if (!Enumerable.SequenceEqual(OldIngredients, IngredientSlot.Select(e => e.Item.type)) || PotionSlot.Item.IsAir && IngredientSlot.Any(a => !a.Item.IsAir))
 			{
-				if (PotionSlot.Item.IsAir) PotionSlot.Item.netDefaults(ModContent.ItemType<AlchPotion>());
+				if (PotionSlot.Item.IsAir)
+				{
+					PotionSlot.Item = new Item();
+					PotionSlot.Item.SetDefaults(ModContent.ItemType<AlchPotion>());
+				}
 				AlchPotion Potion = PotionSlot.Item.modItem as AlchPotion;
 				if (!Potion.Brewed)
 				{
 					Potion.ItemsOnPotion.Clear();
+					OldAverageColor = AverageColor;
+					AverageColor = new Color();
 					for (int i = 0; i < IngredientSlot.Length; i++)
 					{
 						if (!IngredientSlot[i].Item.IsAir)
 						{
-							AverageColor = MixColor(AverageColor, ColorsToArrayToAverage(Main.itemTexture[IngredientSlot[i].Item.type]));
+							if (AverageColor.R == 0) AverageColor = ColorsToArrayToAverage(Main.itemTexture[IngredientSlot[i].Item.type]);
+							else AverageColor = MixColor(AverageColor, ColorsToArrayToAverage(Main.itemTexture[IngredientSlot[i].Item.type]));
 							if (Potion.ItemsOnPotion.FindAll(t => t.type == IngredientSlot[i].Item.type).Count > 0)
 							{
 								Potion.ItemsOnPotion.Find(t => t.type == IngredientSlot[i].Item.type).stack++;
@@ -119,8 +127,25 @@ namespace PotionOverhaul.UI
 							}
 						}
 					}
-					Potion.AverageColor = AverageColor;
 					PotionSlot.Item.alpha = 155;
+					Potion.AverageColor = AverageColor;
+					Potion.Style = Main.rand.Next(1, 2);
+
+					Texture2D texture = ModContent.GetTexture("PotionOverhaul/PotionStyles/Style" + Potion.Style);
+					Color[] pixels = new Color[texture.Width * texture.Height];
+					texture.GetData(pixels);
+					for (int x = 0; x < texture.Width; x++)
+					{
+						for (int y = 0; y < texture.Height; y++)
+						{
+							if (pixels[x + y * texture.Width] == Color.White || pixels[x + y * texture.Width] == OldAverageColor)
+							{
+								pixels[x + y * texture.Width] = AverageColor;
+							}
+						}
+					}
+					texture.SetData(pixels);
+					Main.itemTexture[PotionSlot.Item.type] = texture;
 				}
 				else
 				{
