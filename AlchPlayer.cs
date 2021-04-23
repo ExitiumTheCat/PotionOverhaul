@@ -2,12 +2,14 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 using System.Linq;
+using Terraria.ModLoader.IO;
 
 namespace PotionOverhaul
 {
 	class AlchPlayer : ModPlayer
 	{
 		public List<Item> ItemsOnPotion = new List<Item>();
+		public List<List<Item>> SavedPotions = new List<List<Item>>();
 		public override void PreUpdate()
 		{
 			if (ItemsOnPotion.Count > 0 && !player.HasBuff(ModContent.BuffType<AlchBuff>()))
@@ -28,6 +30,18 @@ namespace PotionOverhaul
 			{
 				AlchEffects.AlchOnMeleeHit(player, ItemsOnPotion[i].stack, ItemsOnPotion[i], target, damage, knockback, crit);
 			}
+		}
+		public override TagCompound Save()
+		{
+			return new TagCompound
+			{
+				{"SavedPotions", SavedPotions}
+			};
+		}
+		public override void Load(TagCompound tag)
+		{
+			if (tag.ContainsKey("SavedPotions"))
+				SavedPotions = tag.GetList<List<Item>>("SavedPotions").ToList();
 		}
 	}
 }

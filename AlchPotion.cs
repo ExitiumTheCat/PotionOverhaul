@@ -67,7 +67,7 @@ namespace PotionOverhaul
 		public override bool UseItem(Player player)
 		{
 			player.GetModPlayer<AlchPlayer>().ItemsOnPotion = ItemsOnPotion;
-			player.AddBuff(ModContent.BuffType<AlchBuff>(), 120);
+			player.AddBuff(ModContent.BuffType<AlchBuff>(), 111600);
 			return true;
 		}
 		public override bool PreDrawInInventory(SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)

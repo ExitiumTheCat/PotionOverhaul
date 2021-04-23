@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using Microsoft.Xna.Framework.Input;
 
 namespace PotionOverhaul.UI
 {
@@ -16,9 +17,10 @@ namespace PotionOverhaul.UI
 	{
 		public static CustomItemSlot[] IngredientSlot = new CustomItemSlot[3];
 		public static CustomItemSlot PotionSlot = new CustomItemSlot();
-		public int[] OldIngredients = new int[3];
 		public UIImage Background = new UIImage(ModContent.GetTexture("PotionOverhaul/UI/Background"));
 		public UIImageButton BrewButton = new UIImageButton(ModContent.GetTexture("PotionOverhaul/UI/BrewButton"));
+		public UIImageButton SaveButton = new UIImageButton(ModContent.GetTexture("PotionOverhaul/UI/SaveButton"));
+		public int[] OldIngredients = new int[3];
 		public bool Blocked;
 		Color OldAverageColor = new Color(1, 1, 1, 1);
 		Color AverageColor = new Color(1, 1, 1, 1);
@@ -78,6 +80,10 @@ namespace PotionOverhaul.UI
 			BrewButton.VAlign = 0.45f;
 			BrewButton.OnClick += OnBrewButton;
 			Background.Append(BrewButton);
+			SaveButton.HAlign = 0.030f;
+			SaveButton.VAlign = 0.970f;
+			SaveButton.OnClick += OnSaveButton;
+			Background.Append(SaveButton);
 
 			OldIngredients = IngredientSlot.Select(e => e.Item.type).ToArray();
 		}
@@ -207,6 +213,29 @@ namespace PotionOverhaul.UI
 					IngredientSlot[i2].Item.stack--;
 				}
 			}
+		}
+		private void OnSaveButton(UIMouseEvent evt, UIElement listeningElement)
+		{
+			if (!IngredientSlot.All(i => i.Item.IsAir))
+			{
+				List<Item> ingredientlist = new List<Item>();
+				for (int i = 0; i < IngredientSlot.Length; i++)
+				{
+					if (!IngredientSlot[i].Item.IsAir)
+					{
+						Item ingredient = IngredientSlot[i].Item.Clone();
+						ingredient.stack = 1;
+						ingredientlist.Add(ingredient);
+					}
+				}
+				Main.LocalPlayer.GetModPlayer<AlchPlayer>().SavedPotions.Add(ingredientlist);
+			}
+		}
+		public override void Draw(SpriteBatch spriteBatch)
+		{
+			base.Draw(spriteBatch);
+			if (SaveButton.IsMouseHovering)
+				Main.hoverItemName = "Save Recipe";
 		}
 		private Color ColorsToArrayToAverage(Texture2D texture)
 		{
