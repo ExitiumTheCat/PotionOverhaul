@@ -27,8 +27,8 @@ namespace PotionOverhaul
 			item.width = 26;
 			item.height = 28;
 			item.useStyle = ItemUseStyleID.EatingUsing;
-			item.useAnimation = 10;
-			item.useTime = 10;
+			item.useAnimation = 8;
+			item.useTime = 8;
 			item.useTurn = true;
 			item.UseSound = SoundID.Item3;
 			item.maxStack = 1;
@@ -66,6 +66,8 @@ namespace PotionOverhaul
 		}
 		public override bool UseItem(Player player)
 		{
+			Texture2D texture = ModContent.GetTexture("PotionOverhaul/PotionStyles/Glass" + Style);
+			Main.itemTexture[item.type] = texture;
 			player.GetModPlayer<AlchPlayer>().ItemsOnPotion = ItemsOnPotion;
 			player.AddBuff(ModContent.BuffType<AlchBuff>(), 111600);
 			return true;

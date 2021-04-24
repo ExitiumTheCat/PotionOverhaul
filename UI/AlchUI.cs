@@ -9,6 +9,7 @@ using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Microsoft.Xna.Framework.Input;
+using Terraria.GameContent.UI.States;
 
 namespace PotionOverhaul.UI
 {
@@ -20,15 +21,20 @@ namespace PotionOverhaul.UI
 		public UIImage Background = new UIImage(ModContent.GetTexture("PotionOverhaul/UI/Background"));
 		public UIImageButton BrewButton = new UIImageButton(ModContent.GetTexture("PotionOverhaul/UI/BrewButton"));
 		public UIImageButton SaveButton = new UIImageButton(ModContent.GetTexture("PotionOverhaul/UI/SaveButton"));
+		public UIImageButton NameEditButton = new UIImageButton(ModContent.GetTexture("PotionOverhaul/UI/NameEditButton"));
+		public UIVirtualKeyboard NameEditor;
+		public UIText NameBeingEdited = new UIText("");
 		public int[] OldIngredients = new int[3];
+		public bool EditingName;
 		public bool Blocked;
-		Color OldAverageColor = new Color(1, 1, 1, 1);
+		public List<Color> OldAverageColors = new List<Color>();
 		Color AverageColor = new Color(1, 1, 1, 1);
 		CroppedTexture2D backgroundTexture = new CroppedTexture2D(ModContent.GetTexture("PotionOverhaul/UI/Slot"), Color.White);
 		CroppedTexture2D iconTextureIngredient = new CroppedTexture2D(ModContent.GetTexture("PotionOverhaul/UI/IngredientSlotIcon"), Color.White);
 		CroppedTexture2D iconTexturePotion = new CroppedTexture2D(ModContent.GetTexture("PotionOverhaul/UI/PotionSlotIcon"), Color.White);
 		public override void OnInitialize()
 		{
+			OldAverageColors.Add(new Color(1, 1, 1, 1));
 			Background.HAlign = 0.7f;
 			Background.VAlign = 0.5f;
 			Append(Background);
@@ -76,6 +82,9 @@ namespace PotionOverhaul.UI
 			PotionSlot.OnClick += OnPotionSlot;
 			Background.Append(PotionSlot);
 
+			NameBeingEdited.HAlign = 0.50f;
+			NameBeingEdited.VAlign = 0.925f;
+			Background.Append(NameBeingEdited);
 			BrewButton.HAlign = 0.50f;
 			BrewButton.VAlign = 0.45f;
 			BrewButton.OnClick += OnBrewButton;
@@ -84,17 +93,21 @@ namespace PotionOverhaul.UI
 			SaveButton.VAlign = 0.970f;
 			SaveButton.OnClick += OnSaveButton;
 			Background.Append(SaveButton);
+			NameEditButton.HAlign = 0.65f;
+			NameEditButton.VAlign = 0.825f;
+			NameEditButton.OnClick += OnNameEdit;
+			NameEditor = new UIVirtualKeyboard("", PotionSlot.Item.Name, null, null, 0, false);
+			NameEditor.HAlign = 1f;
+			NameEditor.VAlign = 1f;
+			NameEditor.RemoveAllChildren();
 
 			OldIngredients = IngredientSlot.Select(e => e.Item.type).ToArray();
 		}
 		public override void Update(GameTime gameTime)
 		{
 			base.Update(gameTime);
-			if (IngredientSlot.All(m => m.Item.IsAir) && !PotionSlot.Item.IsAir && !(PotionSlot.Item.modItem as AlchPotion).Brewed)
-			{
-				PotionSlot.Item.TurnToAir();
-				return;
-			}
+			if (Background.IsMouseHovering)
+				Main.LocalPlayer.mouseInterface = true;
 			if (Blocked)
 			{
 				if (!PotionSlot.Item.IsAir && !(PotionSlot.Item.modItem as AlchPotion).Brewed)
@@ -104,6 +117,12 @@ namespace PotionOverhaul.UI
 			}
 			if (!Enumerable.SequenceEqual(OldIngredients, IngredientSlot.Select(e => e.Item.type)) || PotionSlot.Item.IsAir && IngredientSlot.Any(a => !a.Item.IsAir))
 			{
+				if (IngredientSlot.All(m => m.Item.IsAir) && !PotionSlot.Item.IsAir && !(PotionSlot.Item.modItem as AlchPotion).Brewed)
+				{
+					PotionSlot.Item.TurnToAir();
+					OldIngredients = IngredientSlot.Select(e => e.Item.type).ToArray();
+					return;
+				}
 				if (PotionSlot.Item.IsAir)
 				{
 					PotionSlot.Item = new Item();
@@ -113,7 +132,7 @@ namespace PotionOverhaul.UI
 				if (!Potion.Brewed)
 				{
 					Potion.ItemsOnPotion.Clear();
-					OldAverageColor = AverageColor;
+					if (!OldAverageColors.Contains(AverageColor)) OldAverageColors.Add(AverageColor);
 					AverageColor = new Color();
 					for (int i = 0; i < IngredientSlot.Length; i++)
 					{
@@ -135,8 +154,7 @@ namespace PotionOverhaul.UI
 					}
 					PotionSlot.Item.alpha = 155;
 					Potion.AverageColor = AverageColor;
-					Potion.Style = Main.rand.Next(1, 2);
-
+					Potion.Style = Main.rand.Next(1, 3);
 					Texture2D texture = ModContent.GetTexture("PotionOverhaul/PotionStyles/Style" + Potion.Style);
 					Color[] pixels = new Color[texture.Width * texture.Height];
 					texture.GetData(pixels);
@@ -144,7 +162,7 @@ namespace PotionOverhaul.UI
 					{
 						for (int y = 0; y < texture.Height; y++)
 						{
-							if (pixels[x + y * texture.Width] == Color.White || pixels[x + y * texture.Width] == OldAverageColor)
+							if (pixels[x + y * texture.Width] == Color.White || OldAverageColors.Contains(pixels[x + y * texture.Width]))
 							{
 								pixels[x + y * texture.Width] = AverageColor;
 							}
@@ -156,6 +174,38 @@ namespace PotionOverhaul.UI
 				else
 				{
 					Blocked = true;
+				}
+			}
+			if (!PotionSlot.Item.IsAir)
+			{
+				Background.Append(NameEditButton);
+			}
+			else
+			{
+				NameEditButton.Remove();
+			}
+			if (Main.mouseLeft)
+			{
+				if (!NameEditButton.IsMouseHovering && EditingName)
+				{
+					NameEditor.Remove();
+					NameBeingEdited.SetText("");
+					EditingName = false;
+				}
+			}
+			if (EditingName)
+			{
+				if (Main.keyState.IsKeyDown(Keys.Enter))
+				{
+					NameEditor.Remove();
+					NameBeingEdited.SetText("");
+					EditingName = false;
+					Main.drawingPlayerChat = false;
+				}
+				else
+				{
+					NameBeingEdited.SetText(NameEditor.Text);
+					PotionSlot.Item.SetNameOverride(NameBeingEdited.Text);
 				}
 			}
 			OldIngredients = IngredientSlot.Select(e => e.Item.type).ToArray();
@@ -201,6 +251,7 @@ namespace PotionOverhaul.UI
 				{
 					IngredientSlot[i2].Item.stack--;
 				}
+				PotionSlot.Item.TurnToAir();
 				return;
 			}
 			Item itemm = Main.mouseItem;
@@ -212,6 +263,7 @@ namespace PotionOverhaul.UI
 				{
 					IngredientSlot[i2].Item.stack--;
 				}
+				PotionSlot.Item.TurnToAir();
 			}
 		}
 		private void OnSaveButton(UIMouseEvent evt, UIElement listeningElement)
@@ -231,11 +283,29 @@ namespace PotionOverhaul.UI
 				Main.LocalPlayer.GetModPlayer<AlchPlayer>().SavedPotions.Add(ingredientlist);
 			}
 		}
+		private void OnNameEdit(UIMouseEvent evt, UIElement listeningElement)
+		{
+			if (!EditingName)
+			{
+				EditingName = true;
+				NameEditor = new UIVirtualKeyboard("", PotionSlot.Item.Name, null, null, 0, false);
+				NameEditor.RemoveAllChildren();
+				Background.Append(NameEditor);
+			}
+			else
+			{
+				NameEditor.Remove();
+				NameBeingEdited.SetText("");
+				EditingName = false;
+			}
+		}
 		public override void Draw(SpriteBatch spriteBatch)
 		{
 			base.Draw(spriteBatch);
 			if (SaveButton.IsMouseHovering)
 				Main.hoverItemName = "Save Recipe";
+			if (NameEditButton.IsMouseHovering)
+				Main.hoverItemName = "Edit Name";
 		}
 		private Color ColorsToArrayToAverage(Texture2D texture)
 		{

@@ -35,13 +35,16 @@ namespace PotionOverhaul
 		{
 			return new TagCompound
 			{
-				{"SavedPotions", SavedPotions}
+				{"SavedPotions", SavedPotions},
+				{"ItemsOnPotion", ItemsOnPotion}
 			};
 		}
 		public override void Load(TagCompound tag)
 		{
 			if (tag.ContainsKey("SavedPotions"))
 				SavedPotions = tag.GetList<List<Item>>("SavedPotions").ToList();
+			if (tag.ContainsKey("ItemsOnPotion"))
+				ItemsOnPotion = tag.GetList<Item>("ItemsOnPotion").ToList();
 		}
 	}
 }

@@ -11,6 +11,10 @@ namespace PotionOverhaul
 		{
 			DisplayName.SetDefault("Potion Effects!");
 		}
+		public override void Update(Player player, ref int buffIndex)
+		{
+			ItemsOnPotion = player.GetModPlayer<AlchPlayer>().ItemsOnPotion;
+		}
 		public override void ModifyBuffTip(ref string tip, ref int rare)
 		{
 			var positive = "";
